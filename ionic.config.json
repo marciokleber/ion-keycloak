@@ -1,0 +1,7 @@
+{
+  "name": "ion-keycloak",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}
