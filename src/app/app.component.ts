@@ -1,5 +1,8 @@
 import { Component } from '@angular/core';
 import { AuthConfig, OAuthService } from 'angular-oauth2-oidc';
+import {Router} from "@angular/router";
+import {Platform} from "@ionic/angular";
+import {AuthService} from "./service/auth.service";
 
 @Component({
   selector: 'app-root',
@@ -7,23 +10,33 @@ import { AuthConfig, OAuthService } from 'angular-oauth2-oidc';
   styleUrls: ['app.component.scss'],
 })
 export class AppComponent {
-  constructor(private oauthService: OAuthService) {
-    this.configureOAuth();
+  constructor(
+    private platform: Platform,
+    private authService: AuthService,
+    private router: Router
+  ) {
+    this.initializeApp();
   }
 
-  private configureOAuth() {
-    const authConfig: AuthConfig = {
-      issuer: "http://10.42.0.1:8080/realms/master",
-      redirectUri: "http://10.42.0.33:8100",
-      clientId: 'example-ionic-app',
-      responseType: 'code',
-      scope: 'openid profile email offline_access',
-      revocationEndpoint: "http://10.42.0.1:8080/realms/master/protocol/openid-connect/revoke",
-      showDebugInformation: true,
-      requireHttps: false
-    };
+  initializeApp() {
+    this.platform.ready().then(() => {
+      // Verifica se o usuário já está logado
+      if (!this.authService.accessToken) {
+        console.log('Nenhum token de acesso encontrado, iniciando login...');
+        this.authService.login();
+      } else {
+        console.log('Usuário já autenticado, carregando aplicação...');
+        // Se o usuário já está autenticado, redireciona para a página principal
+        this.router.navigate(['/home']);
+      }
 
-    this.oauthService.configure(authConfig);
-    this.oauthService.loadDiscoveryDocumentAndTryLogin();
+      // Configura para monitorar o redirecionamento de login e tratar o retorno ao app
+      this.authService.oauthServiceInstance.events.subscribe(event => {
+        if (event.type === 'token_received') {
+          console.log('Token recebido após login, redirecionando...');
+          this.router.navigate(['/home']);
+        }
+      });
+    });
   }
 }

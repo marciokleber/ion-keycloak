@@ -9,6 +9,9 @@ const config: CapacitorConfig = {
     webContentsDebuggingEnabled: true
   },
   server:{
+    androidHostname: 'com.android.app.ion',
+    androidScheme: 'http',
+    hostname: 'com.android.app.ion',
     cleartext:true
   }
 };
